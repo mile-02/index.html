@@ -1,75 +1,122 @@
-import tkinter as tk
-import random
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Desafio Divertido</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive;
+      background-color: #f0f8ff;
+      text-align: center;
+      padding: 30px;
+    }
+    h1 {
+      color: #ff6600;
+    }
+    .box {
+      background: #fffbe6;
+      border: 2px solid #ffd700;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px auto;
+      width: 80%;
+      max-width: 400px;
+    }
+    input {
+      padding: 10px;
+      font-size: 18px;
+      margin: 10px;
+      width: 80%;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #mensagem {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎲 Desafio Divertido 🎲</h1>
 
-# Lista de palavras simples
-palavras = ['bola', 'gato', 'casa', 'pato', 'livro', 'mae', 'pai', 'mesa']
+  <div class="box">
+    <p id="palavra">Palavra: </p>
+    <input type="text" id="respostaPalavra" placeholder="Digite a palavra certa">
+  </div>
 
-# Função para embaralhar uma palavra
-def embaralhar(palavra):
-    letras = list(palavra)
-    random.shuffle(letras)
-    return ''.join(letras)
+  <div class="box">
+    <p id="conta">Conta: </p>
+    <input type="number" id="respostaConta" placeholder="Digite o resultado">
+  </div>
 
-# Função para nova rodada
-def nova_rodada():
-    global palavra_atual, resposta_conta
+  <button onclick="verificar()">Verificar</button>
 
-    # Palavra
-    palavra_atual = random.choice(palavras)
-    palavra_embaralhada = embaralhar(palavra_atual)
-    label_palavra.config(text=f"Descubra a palavra: {palavra_embaralhada}")
+  <div id="mensagem"></div>
+  <p>Pontuação: <span id="pontos">0</span></p>
 
-    # Conta
-    a = random.randint(1, 20)
-    b = random.randint(1, 20)
-    if random.choice([True, False]):
-        pergunta = f"{a} + {b}"
-        resposta_conta = a + b
-    else:
-        if a < b: a, b = b, a  # evitar resultado negativo
-        pergunta = f"{a} - {b}"
-        resposta_conta = a - b
-    label_conta.config(text=f"Resolva a conta: {pergunta}")
+  <script>
+    const palavras = ["gato", "casa", "pato", "mesa", "livro", "bola", "sapato", "papel"];
+    let palavraCorreta = "";
+    let respostaCertaConta = 0;
+    let pontos = 0;
 
-    entrada_palavra.delete(0, tk.END)
-    entrada_conta.delete(0, tk.END)
+    function embaralhar(palavra) {
+      return palavra.split('').sort(() => 0.5 - Math.random()).join('');
+    }
 
-def verificar_resposta():
-    palavra = entrada_palavra.get().strip().lower()
-    try:
-        conta = int(entrada_conta.get())
-    except ValueError:
-        conta = None
+    function novaRodada() {
+      // Palavra
+      palavraCorreta = palavras[Math.floor(Math.random() * palavras.length)];
+      const embaralhada = embaralhar(palavraCorreta);
+      document.getElementById("palavra").innerText = `Palavra: ${embaralhada}`;
 
-    if palavra == palavra_atual and conta == resposta_conta:
-        resultado.config(text="🎉 Muito bem!", fg="green")
-    else:
-        resultado.config(text="❌ Tente de novo!", fg="red")
-    root.after(1500, nova_rodada)
+      // Conta
+      let a = Math.floor(Math.random() * 10) + 1;
+      let b = Math.floor(Math.random() * 10) + 1;
+      if (Math.random() > 0.5) {
+        respostaCertaConta = a + b;
+        document.getElementById("conta").innerText = `Conta: ${a} + ${b}`;
+      } else {
+        if (b > a) [a, b] = [b, a];
+        respostaCertaConta = a - b;
+        document.getElementById("conta").innerText = `Conta: ${a} - ${b}`;
+      }
 
-# Criar janela
-root = tk.Tk()
-root.title("Desafio das Palavras e Números")
-root.geometry("400x300")
+      // Limpar inputs
+      document.getElementById("respostaPalavra").value = "";
+      document.getElementById("respostaConta").value = "";
+      document.getElementById("mensagem").innerText = "";
+    }
 
-label_palavra = tk.Label(root, text="", font=("Arial", 16))
-label_palavra.pack(pady=10)
+    function verificar() {
+      const respostaPalavra = document.getElementById("respostaPalavra").value.toLowerCase();
+      const respostaConta = parseInt(document.getElementById("respostaConta").value);
 
-entrada_palavra = tk.Entry(root, font=("Arial", 14))
-entrada_palavra.pack()
+      if (respostaPalavra === palavraCorreta && respostaConta === respostaCertaConta) {
+        pontos++;
+        document.getElementById("mensagem").innerText = "🎉 Muito bem!";
+        document.getElementById("mensagem").style.color = "green";
+      } else {
+        document.getElementById("mensagem").innerText = "❌ Tente de novo!";
+        document.getElementById("mensagem").style.color = "red";
+      }
 
-label_conta = tk.Label(root, text="", font=("Arial", 16))
-label_conta.pack(pady=10)
+      document.getElementById("pontos").innerText = pontos;
+      setTimeout(novaRodada, 1500);
+    }
 
-entrada_conta = tk.Entry(root, font=("Arial", 14))
-entrada_conta.pack()
-
-btn_verificar = tk.Button(root, text="Verificar", font=("Arial", 14), command=verificar_resposta)
-btn_verificar.pack(pady=10)
-
-resultado = tk.Label(root, text="", font=("Arial", 16))
-resultado.pack()
-
-nova_rodada()
-
-root.mainloop()
+    // Iniciar primeira rodada
+    novaRodada();
+  </script>
+</body>
+</html>
