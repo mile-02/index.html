@@ -1,0 +1,75 @@
+import tkinter as tk
+import random
+
+# Lista de palavras simples
+palavras = ['bola', 'gato', 'casa', 'pato', 'livro', 'mae', 'pai', 'mesa']
+
+# Função para embaralhar uma palavra
+def embaralhar(palavra):
+    letras = list(palavra)
+    random.shuffle(letras)
+    return ''.join(letras)
+
+# Função para nova rodada
+def nova_rodada():
+    global palavra_atual, resposta_conta
+
+    # Palavra
+    palavra_atual = random.choice(palavras)
+    palavra_embaralhada = embaralhar(palavra_atual)
+    label_palavra.config(text=f"Descubra a palavra: {palavra_embaralhada}")
+
+    # Conta
+    a = random.randint(1, 20)
+    b = random.randint(1, 20)
+    if random.choice([True, False]):
+        pergunta = f"{a} + {b}"
+        resposta_conta = a + b
+    else:
+        if a < b: a, b = b, a  # evitar resultado negativo
+        pergunta = f"{a} - {b}"
+        resposta_conta = a - b
+    label_conta.config(text=f"Resolva a conta: {pergunta}")
+
+    entrada_palavra.delete(0, tk.END)
+    entrada_conta.delete(0, tk.END)
+
+def verificar_resposta():
+    palavra = entrada_palavra.get().strip().lower()
+    try:
+        conta = int(entrada_conta.get())
+    except ValueError:
+        conta = None
+
+    if palavra == palavra_atual and conta == resposta_conta:
+        resultado.config(text="🎉 Muito bem!", fg="green")
+    else:
+        resultado.config(text="❌ Tente de novo!", fg="red")
+    root.after(1500, nova_rodada)
+
+# Criar janela
+root = tk.Tk()
+root.title("Desafio das Palavras e Números")
+root.geometry("400x300")
+
+label_palavra = tk.Label(root, text="", font=("Arial", 16))
+label_palavra.pack(pady=10)
+
+entrada_palavra = tk.Entry(root, font=("Arial", 14))
+entrada_palavra.pack()
+
+label_conta = tk.Label(root, text="", font=("Arial", 16))
+label_conta.pack(pady=10)
+
+entrada_conta = tk.Entry(root, font=("Arial", 14))
+entrada_conta.pack()
+
+btn_verificar = tk.Button(root, text="Verificar", font=("Arial", 14), command=verificar_resposta)
+btn_verificar.pack(pady=10)
+
+resultado = tk.Label(root, text="", font=("Arial", 16))
+resultado.pack()
+
+nova_rodada()
+
+root.mainloop()
